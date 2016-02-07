@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8">
+    <title><%= page_title %></title>
+  </head>
+  <body>
+    <table>
+      <tr>
+        <td>
+          <%- unless parent_name.empty? -%>
+            <a href="../index.html"><%= parent_name %></a>
+            <%- parent_name = "" -%>
+          <%- end -%> 
+        </td>
+        <td>
+          <%- unless current_name.empty? -%>
+            <%= current_name %>
+            <%- current_name = "" -%>
+          <%- end -%> 
+        </td>
+        <td></td>
+      </tr>
+      <%- child_folders.each do |folder| -%>
+        <tr>
+          <td></td><td></td><td>
+            <a href="./<%= folder %>/index.html"><%= folder %></a>
+          </td>
+        </tr>
+      <%- end -%>
+    </table>
+    
+    <hr />
+    <%- image_src.size.times do |n| -%>
+    <a href="./<%= image_link[n] %>"><img src="./.thumbnails/<%= image_src[n] %>"></a>
+    <%- end -%>
+    <hr />
+    
+  </body>
+</html>
