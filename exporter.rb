@@ -15,20 +15,17 @@ class Exporter
   
   def copy_file(source, destination, filename)
     print "copy #{source}/#{filename} #{destination}/.images\n"
-    FileUtils.copy("#{source}/#{filename}", "#{destination}/.images")
+    original = Magick::Image.read("#{source}/#{filename}").first
+    image = original.resize_to_fit(@image_max_width, @image_max_height)
+    image.write("#{destination}/.images/#{filename}")
   end
   
   def create_thumbnail(path, filename)
     # create thumbnail in ".thumbnails" folder 
+    print "create thumbnail #{path}/.thumbnails/#{filename}\n"
     original = Magick::Image.read("#{path}/.images/#{filename}").first
     image = original.resize_to_fill(@thumbnail_width, @thumbnail_height)
     image.write("#{path}/.thumbnails/#{filename}")
-  end
-  
-  def filtering(path, filename)
-    original = Magick::Image.read("#{path}/.images/#{filename}").first
-    image = original.resize_to_fit(@image_max_width, @image_max_height)
-    image.write("#{path}/.images/#{filename}")
   end
   
   # export from source folder structure to destination path
@@ -41,9 +38,9 @@ class Exporter
       FileUtils.mkdir_p("#{destination}/.thumbnails") unless Dir.exist?("#{destination}/.thumbnails")
     end
     fs[:images].each{|image|
+      next if FileTest::directory?(source + "/" + image)
       copy_file(source, destination, image)
       create_thumbnail(destination, image)
-      filtering(destination, image)
     }
     
     fs[:folders].each {|folder|

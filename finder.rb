@@ -2,8 +2,8 @@
 require 'FileUtils'
 
 def isImage?(path)
-  ext = File.extname(path)
-  ext == ".jpg" || ext == ".png" || ext == ".bmp"
+  ext = File.extname(path).downcase
+  ext == ".jpg" || ext == ".png" || ext == ".bmp" || ext == ".gif"
 end
 
 class ImageFinder
@@ -16,6 +16,7 @@ class ImageFinder
   def findImages(source)
     list = []
     Dir::foreach(source) {|f|
+      next if f == "." || f == ".."
       next unless isImage?(f)
       list.push(f)
     }
