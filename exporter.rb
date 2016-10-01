@@ -1,6 +1,4 @@
 # export image files with resize
-# フォルダ構成をdestinationに再現すると同時にthumbnail作成、リサイズを行う
-# フィルタ設定はymlでやったほうがいいのでは
 require 'FileUtils'
 require 'RMagick'
 
@@ -11,6 +9,8 @@ class Exporter
     # read yml for configuration
     @thumbnail_width = 160
     @thumbnail_height = 160
+    @image_max_width = 480
+    @image_max_height = 480
   end
   
   def copy_file(source, destination, filename)
@@ -25,6 +25,12 @@ class Exporter
     image.write("#{path}/.thumbnails/#{filename}")
   end
   
+  def filtering(path, filename)
+    original = Magick::Image.read("#{path}/.images/#{filename}").first
+    image = original.resize_to_fit(@image_max_width, @image_max_height)
+    image.write("#{path}/.images/#{filename}")
+  end
+  
   # export from source folder structure to destination path
   def export(fs, path, rpath = "")
     source = "#{fs[:root]}/#{fs[:rpath]}"
@@ -36,8 +42,8 @@ class Exporter
     end
     fs[:images].each{|image|
       copy_file(source, destination, image)
-      #filtering(destination, image)
       create_thumbnail(destination, image)
+      filtering(destination, image)
     }
     
     fs[:folders].each {|folder|
