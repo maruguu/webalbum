@@ -14,18 +14,28 @@ class Exporter
   end
   
   def copy_file(source, destination, filename)
-    print "copy #{source}/#{filename} #{destination}/.images\n"
-    original = Magick::Image.read("#{source}/#{filename}").first
-    image = original.resize_to_fit(@image_max_width, @image_max_height)
-    image.write("#{destination}/.images/#{filename}")
+    dstpath = "#{destination}/.images/#{filename}"
+    if File.exist?(dstpath)
+      print "skip copy #{source}/#{filename}\n"
+    else
+      print "copy #{source}/#{filename} -> #{dstpath}\n"
+      original = Magick::Image.read("#{source}/#{filename}").first
+      image = original.resize_to_fit(@image_max_width, @image_max_height)
+      image.write(dstpath)
+    end
   end
   
   def create_thumbnail(path, filename)
-    # create thumbnail in ".thumbnails" folder 
-    print "create thumbnail #{path}/.thumbnails/#{filename}\n"
-    original = Magick::Image.read("#{path}/.images/#{filename}").first
-    image = original.resize_to_fill(@thumbnail_width, @thumbnail_height)
-    image.write("#{path}/.thumbnails/#{filename}")
+    dstpath = "#{path}/.thumbnails/#{filename}"
+    if File.exist?(dstpath)
+      print "skip create thumbnail #{dstpath}\n"
+    else
+      # create thumbnail in ".thumbnails" folder 
+      print "create thumbnail to #{dstpath}\n"
+      original = Magick::Image.read("#{path}/.images/#{filename}").first
+      image = original.resize_to_fill(@thumbnail_width, @thumbnail_height)
+      image.write(dstpath)
+    end
   end
   
   # export from source folder structure to destination path
