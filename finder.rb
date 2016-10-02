@@ -33,10 +33,14 @@ class ImageFinder
       path = source + "/" + f
       if FileTest::directory?(path)
         new_r_path = r_path + "/" + f
-        list.push ({:root => @root,
-                    :rpath => new_r_path, 
-                    :images => findImages(path), 
-                    :folders => findFolders(new_r_path)})
+        imagelist = findImages(path)
+        folderlist = findFolders(new_r_path)
+        if !(imagelist.empty? && folderlist.empty?)
+          list.push ({:root => @root,
+                      :rpath => new_r_path, 
+                      :images => imagelist, 
+                      :folders => folderlist})
+        end
       end
     }
     list
