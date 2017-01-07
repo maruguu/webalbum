@@ -6,6 +6,11 @@ def isImage?(path)
   ext == ".jpg" || ext == ".png" || ext == ".bmp" || ext == ".gif"
 end
 
+def isMovie?(path)
+  ext = File.extname(path).downcase
+  ext == ".mp4" || ext == ".wmv"
+end
+
 class ImageFinder
   attr_reader :root
   def initialize(source)
@@ -23,6 +28,15 @@ class ImageFinder
     list
   end
   
+  def findMovies(source)
+    list = []
+    Dir::foreach(source) {|f|
+      next unless isMovie?(f)
+      list.push(f)
+    }
+    list
+  end
+  
   # return array of folder structure hash
   def findFolders(r_path)
     list = []
@@ -34,11 +48,13 @@ class ImageFinder
       if FileTest::directory?(path)
         new_r_path = r_path + "/" + f
         imagelist = findImages(path)
+        movielist = findMovies(path)
         folderlist = findFolders(new_r_path)
         if !(imagelist.empty? && folderlist.empty?)
           list.push ({:root => @root,
-                      :rpath => new_r_path, 
-                      :images => imagelist, 
+                      :rpath => new_r_path,
+                      :images => imagelist,
+                      :movies => movielist,
                       :folders => folderlist})
         end
       end
@@ -50,7 +66,8 @@ class ImageFinder
     {:root => @root,
      :rpath => "",
      :images => findImages(@root),
-     :folders => findFolders("") 
+     :movies => findMovies(@root),
+     :folders => findFolders("")
     }
   end
   
@@ -61,6 +78,10 @@ class ImageFinder
     folder[:images].each {|image|
       (level+1).times { print "  " }
       puts image
+    }
+    folder[:movies].each {|movie|
+      (level+1).times { print "  " }
+      puts movie
     }
     folder[:folders].each {|f|
       self.print_structure(f, level + 1)

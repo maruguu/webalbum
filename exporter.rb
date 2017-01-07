@@ -13,7 +13,7 @@ class Exporter
     @image_max_height = 480
   end
   
-  def copy_file(source, destination, filename)
+  def copy_image(source, destination, filename)
     dstpath = "#{destination}/.images/#{filename}"
     if File.exist?(dstpath)
       print "skip copy #{source}/#{filename}\n"
@@ -38,6 +38,16 @@ class Exporter
     end
   end
   
+  def copy_movie(source, destination, filename)
+    dstpath = "#{destination}/.movies/#{filename}"
+    if File.exist?(dstpath)
+      print "skip copy #{source}/#{filename}\n"
+    else
+      print "copy #{source}/#{filename} -> #{dstpath}\n"
+      FileUtils.copy("#{source}/#{filename}", "#{destination}/.movies")
+    end
+  end
+  
   # export from source folder structure to destination path
   def export(fs, path, rpath = "")
     source = "#{fs[:root]}/#{fs[:rpath]}"
@@ -45,14 +55,17 @@ class Exporter
     if not fs[:images].empty?
       FileUtils.mkdir_p(destination) unless Dir.exist?(destination)
       FileUtils.mkdir_p("#{destination}/.images") unless Dir.exist?("#{destination}/.images")
+      FileUtils.mkdir_p("#{destination}/.movies") unless Dir.exist?("#{destination}/.movies")
       FileUtils.mkdir_p("#{destination}/.thumbnails") unless Dir.exist?("#{destination}/.thumbnails")
     end
     fs[:images].each{|image|
       next if FileTest::directory?(source + "/" + image)
-      copy_file(source, destination, image)
+      copy_image(source, destination, image)
       create_thumbnail(destination, image)
     }
-    
+    fs[:movies].each{|movie|
+      copy_movie(source, destination, movie)
+    }
     fs[:folders].each {|folder|
       export(folder, path, folder[:rpath])
     }
